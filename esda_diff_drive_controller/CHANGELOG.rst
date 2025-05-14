@@ -86,7 +86,7 @@ Changelog for package diff_drive_controller
 
 2.30.0 (2023-12-20)
 -------------------
-* [DiffDriveController] Optional tf namespace prefixes instead of using node namespace (backport `#533 <https://github.com/ros-controls/ros2_controllers/issues/533>`_) (`#726 <https://github.com/ros-controls/ros2_controllers/issues/726>`_)
+* [EsdaDiffDriveController] Optional tf namespace prefixes instead of using node namespace (backport `#533 <https://github.com/ros-controls/ros2_controllers/issues/533>`_) (`#726 <https://github.com/ros-controls/ros2_controllers/issues/726>`_)
 * Contributors: mergify[bot]
 
 2.29.0 (2023-12-05)
@@ -134,7 +134,7 @@ Changelog for package diff_drive_controller
 
 2.20.0 (2023-05-14)
 -------------------
-* Clear registered handles of DiffDriveController on deactivate (`#596 <https://github.com/ros-controls/ros2_controllers/issues/596>`_) (`#606 <https://github.com/ros-controls/ros2_controllers/issues/606>`_)
+* Clear registered handles of EsdaDiffDriveController on deactivate (`#596 <https://github.com/ros-controls/ros2_controllers/issues/596>`_) (`#606 <https://github.com/ros-controls/ros2_controllers/issues/606>`_)
 * Contributors: Noel Jiménez García
 
 2.19.0 (2023-05-02)
@@ -155,7 +155,7 @@ Changelog for package diff_drive_controller
 
 2.17.1 (2023-02-20)
 -------------------
-* [DiffDriveController] Fix prefixing of frame id with controller's namespace (`#522 <https://github.com/ros-controls/ros2_controllers/issues/522>`_)
+* [EsdaDiffDriveController] Fix prefixing of frame id with controller's namespace (`#522 <https://github.com/ros-controls/ros2_controllers/issues/522>`_)
 * Contributors: Tim Verbelen
 
 2.17.0 (2023-02-13)
@@ -172,8 +172,8 @@ Changelog for package diff_drive_controller
 
 2.15.0 (2022-12-06)
 -------------------
-* [DiffDriveController] Use generate parameter library (`#386 <https://github.com/ros-controls/ros2_controllers/issues/386>`_)
-* [DiffDriveController] Change units of velocity feedback (`#452 <https://github.com/ros-controls/ros2_controllers/issues/452>`_)
+* [EsdaDiffDriveController] Use generate parameter library (`#386 <https://github.com/ros-controls/ros2_controllers/issues/386>`_)
+* [EsdaDiffDriveController] Change units of velocity feedback (`#452 <https://github.com/ros-controls/ros2_controllers/issues/452>`_)
 * Contributors: Maciej Stępień, Paul Gesel, Denis Štogl, Bence Magyar
 
 2.14.0 (2022-11-18)

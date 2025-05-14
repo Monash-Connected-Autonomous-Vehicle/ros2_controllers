@@ -22,7 +22,7 @@
 #include <utility>
 #include <vector>
 
-#include "diff_drive_controller/diff_drive_controller.hpp"
+#include "esda_diff_drive_controller/esda_diff_drive_controller.hpp"
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "lifecycle_msgs/msg/state.hpp"
 #include "rclcpp/logging.hpp"
@@ -38,7 +38,7 @@ constexpr auto DEFAULT_ODOMETRY_TOPIC = "~/odom";
 constexpr auto DEFAULT_TRANSFORM_TOPIC = "/tf";
 }  // namespace
 
-namespace diff_drive_controller
+namespace esda_diff_drive_controller
 {
 using namespace std::chrono_literals;
 using controller_interface::interface_configuration_type;
@@ -47,14 +47,14 @@ using hardware_interface::HW_IF_POSITION;
 using hardware_interface::HW_IF_VELOCITY;
 using lifecycle_msgs::msg::State;
 
-DiffDriveController::DiffDriveController() : controller_interface::ControllerInterface() {}
+EsdaDiffDriveController::EsdaDiffDriveController() : controller_interface::ControllerInterface() {}
 
-const char * DiffDriveController::feedback_type() const
+const char * EsdaDiffDriveController::feedback_type() const
 {
   return params_.position_feedback ? HW_IF_POSITION : HW_IF_VELOCITY;
 }
 
-controller_interface::CallbackReturn DiffDriveController::on_init()
+controller_interface::CallbackReturn EsdaDiffDriveController::on_init()
 {
   try
   {
@@ -98,7 +98,7 @@ controller_interface::CallbackReturn DiffDriveController::on_init()
   return controller_interface::CallbackReturn::SUCCESS;
 }
 
-InterfaceConfiguration DiffDriveController::command_interface_configuration() const
+InterfaceConfiguration EsdaDiffDriveController::command_interface_configuration() const
 {
   std::vector<std::string> conf_names;
   for (const auto & joint_name : params_.left_wheel_names)
@@ -112,7 +112,7 @@ InterfaceConfiguration DiffDriveController::command_interface_configuration() co
   return {interface_configuration_type::INDIVIDUAL, conf_names};
 }
 
-InterfaceConfiguration DiffDriveController::state_interface_configuration() const
+InterfaceConfiguration EsdaDiffDriveController::state_interface_configuration() const
 {
   std::vector<std::string> conf_names;
   for (const auto & joint_name : params_.left_wheel_names)
@@ -126,7 +126,7 @@ InterfaceConfiguration DiffDriveController::state_interface_configuration() cons
   return {interface_configuration_type::INDIVIDUAL, conf_names};
 }
 
-controller_interface::return_type DiffDriveController::update(
+controller_interface::return_type EsdaDiffDriveController::update(
   const rclcpp::Time & time, const rclcpp::Duration & period)
 {
   auto logger = get_node()->get_logger();
@@ -317,7 +317,7 @@ controller_interface::return_type DiffDriveController::update(
   return controller_interface::return_type::OK;
 }
 
-void DiffDriveController::set_param(const std::string &param_id, double value) {
+void EsdaDiffDriveController::set_param(const std::string &param_id, double value) {
   auto request = std::make_shared<mavros_msgs::srv::ParamSetV2::Request>();
   request->param_id = param_id;
 
@@ -338,7 +338,7 @@ void DiffDriveController::set_param(const std::string &param_id, double value) {
 }
 
 
-controller_interface::CallbackReturn DiffDriveController::on_configure(
+controller_interface::CallbackReturn EsdaDiffDriveController::on_configure(
   const rclcpp_lifecycle::State &)
 {
   auto logger = get_node()->get_logger();
@@ -528,7 +528,7 @@ controller_interface::CallbackReturn DiffDriveController::on_configure(
   return controller_interface::CallbackReturn::SUCCESS;
 }
 
-controller_interface::CallbackReturn DiffDriveController::on_activate(
+controller_interface::CallbackReturn EsdaDiffDriveController::on_activate(
   const rclcpp_lifecycle::State &)
 {
   const auto left_result =
@@ -558,7 +558,7 @@ controller_interface::CallbackReturn DiffDriveController::on_activate(
   return controller_interface::CallbackReturn::SUCCESS;
 }
 
-controller_interface::CallbackReturn DiffDriveController::on_deactivate(
+controller_interface::CallbackReturn EsdaDiffDriveController::on_deactivate(
   const rclcpp_lifecycle::State &)
 {
   subscriber_is_active_ = false;
@@ -572,7 +572,7 @@ controller_interface::CallbackReturn DiffDriveController::on_deactivate(
   return controller_interface::CallbackReturn::SUCCESS;
 }
 
-controller_interface::CallbackReturn DiffDriveController::on_cleanup(
+controller_interface::CallbackReturn EsdaDiffDriveController::on_cleanup(
   const rclcpp_lifecycle::State &)
 {
   if (!reset())
@@ -584,7 +584,7 @@ controller_interface::CallbackReturn DiffDriveController::on_cleanup(
   return controller_interface::CallbackReturn::SUCCESS;
 }
 
-controller_interface::CallbackReturn DiffDriveController::on_error(const rclcpp_lifecycle::State &)
+controller_interface::CallbackReturn EsdaDiffDriveController::on_error(const rclcpp_lifecycle::State &)
 {
   if (!reset())
   {
@@ -593,7 +593,7 @@ controller_interface::CallbackReturn DiffDriveController::on_error(const rclcpp_
   return controller_interface::CallbackReturn::SUCCESS;
 }
 
-bool DiffDriveController::reset()
+bool EsdaDiffDriveController::reset()
 {
   odometry_.resetOdometry();
 
@@ -613,7 +613,7 @@ bool DiffDriveController::reset()
   return true;
 }
 
-void DiffDriveController::halt()
+void EsdaDiffDriveController::halt()
 {
   const auto halt_wheels = [](auto & wheel_handles)
   {
@@ -627,7 +627,7 @@ void DiffDriveController::halt()
   halt_wheels(registered_right_wheel_handles_);
 }
 
-controller_interface::CallbackReturn DiffDriveController::configure_side(
+controller_interface::CallbackReturn EsdaDiffDriveController::configure_side(
   const std::string & side, const std::vector<std::string> & wheel_names,
   std::vector<WheelHandle> & registered_handles)
 {
@@ -678,9 +678,9 @@ controller_interface::CallbackReturn DiffDriveController::configure_side(
 
   return controller_interface::CallbackReturn::SUCCESS;
 }
-}  // namespace diff_drive_controller
+}  // namespace esda_diff_drive_controller
 
 #include "class_loader/register_macro.hpp"
 
 CLASS_LOADER_REGISTER_CLASS(
-  diff_drive_controller::DiffDriveController, controller_interface::ControllerInterface)
+  esda_diff_drive_controller::EsdaDiffDriveController, controller_interface::ControllerInterface)

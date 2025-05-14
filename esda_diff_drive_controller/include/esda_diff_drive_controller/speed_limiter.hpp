@@ -16,12 +16,12 @@
  * Author: Enrique Fernández
  */
 
-#ifndef DIFF_DRIVE_CONTROLLER__SPEED_LIMITER_HPP_
-#define DIFF_DRIVE_CONTROLLER__SPEED_LIMITER_HPP_
+#ifndef ESDA_DIFF_DRIVE_CONTROLLER__SPEED_LIMITER_HPP_
+#define ESDA_DIFF_DRIVE_CONTROLLER__SPEED_LIMITER_HPP_
 
 #include <cmath>
 
-namespace diff_drive_controller
+namespace esda_diff_drive_controller
 {
 class SpeedLimiter
 {
@@ -100,6 +100,6 @@ private:
   double max_jerk_;
 };
 
-}  // namespace diff_drive_controller
+}  // namespace esda_diff_drive_controller
 
-#endif  // DIFF_DRIVE_CONTROLLER__SPEED_LIMITER_HPP_
+#endif  // ESDA_DIFF_DRIVE_CONTROLLER__SPEED_LIMITER_HPP_

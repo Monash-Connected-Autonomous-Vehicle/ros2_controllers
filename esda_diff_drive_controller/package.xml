@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="3">
-  <name>diff_drive_controller</name>
+  <name>esda_diff_drive_controller</name>
   <version>2.45.0</version>
   <description>Controller for a differential-drive mobile base.</description>
 
