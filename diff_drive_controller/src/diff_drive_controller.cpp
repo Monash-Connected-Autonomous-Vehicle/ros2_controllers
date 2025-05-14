@@ -27,6 +27,7 @@
 #include "lifecycle_msgs/msg/state.hpp"
 #include "rclcpp/logging.hpp"
 #include "tf2/LinearMath/Quaternion.h"
+#include "geometry_msgs/msg/twist.hpp"
 
 namespace
 {
@@ -60,6 +61,33 @@ controller_interface::CallbackReturn DiffDriveController::on_init()
     // Create the parameter listener and get the parameters
     param_listener_ = std::make_shared<ParamListener>(get_node());
     params_ = param_listener_->get_params();
+
+    //----MAVROS PARAMTER SETUP----
+    param_set_client_ = get_node()->create_client<mavros_msgs::srv::ParamSetV2>("/mavros/param/set");
+
+    if (!param_set_client_->wait_for_service(60s)) {
+      RCLCPP_ERROR(get_node()->get_logger(), "ParamSet service not available.");
+    }
+
+    const geometry_msgs::msg::Twist empty_twist;
+
+    // Fill last two commands with default constructed commands
+    received_twist_msg_ptr_.set(std::make_shared<geometry_msgs::msg::Twist>(empty_twist));
+
+    cmd_vel_sub_ = get_node()->create_subscription<geometry_msgs::msg::Twist>(
+      "/cmd_vel", 10,
+      [this](const std::shared_ptr<geometry_msgs::msg::Twist> msg) -> void
+      {
+        // Write fake header in the stored stamped command
+        std::shared_ptr<geometry_msgs::msg::Twist> twist;
+        received_twist_msg_ptr_.get(twist);
+        twist->linear = msg->linear;
+        twist->angular = msg->angular;
+      }
+    );
+
+    RCLCPP_INFO(get_node()->get_logger(), "Subscribed to /cmd_vel. Ready to convert Twist to param set.");
+
   }
   catch (const std::exception & e)
   {
@@ -258,14 +286,57 @@ controller_interface::return_type DiffDriveController::update(
     (linear_command + angular_command * wheel_separation / 2.0) / right_wheel_radius;
 
   // Set wheels velocities:
-  for (size_t index = 0; index < static_cast<size_t>(params_.wheels_per_side); ++index)
+  /*
+  bool set_command_result = true;
+  for (size_t index = 0; index < static_cast<size_t>(wheels_per_side_); ++index)
   {
     registered_left_wheel_handles_[index].velocity.get().set_value(velocity_left);
     registered_right_wheel_handles_[index].velocity.get().set_value(velocity_right);
   }
+  */
+
+  //SEND COMMANDS TO SERVOS
+  double trim_servo1, trim_servo2;
+
+  std::shared_ptr<geometry_msgs::msg::Twist> last_twist_command_msg;
+  received_twist_msg_ptr_.get(last_twist_command_msg);
+
+  trim_servo1 = 1500.0 + last_twist_command_msg->linear.x * 100.0;  // Mapping for linear.x
+  trim_servo2 = 1500.0 + last_twist_command_msg->linear.x * 100.0; // Mapping for angular.z
+
+  trim_servo1 = std::clamp(trim_servo1, 1000.0, 2000.0);
+  trim_servo2 = std::clamp(trim_servo2, 1000.0, 2000.0);
+
+  RCLCPP_INFO(get_node()->get_logger(), "Received cmd_vel: linear.x=%.2f → SERVO1_TRIM=%.2f, angular.z=%.2f → SERVO2_TRIM=%.2f",
+              last_twist_command_msg->linear.x, trim_servo1, last_twist_command_msg->angular.z, trim_servo2);
+
+  set_param("SERVO1_TRIM", trim_servo1);
+  // std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  set_param("SERVO2_TRIM", trim_servo2);
 
   return controller_interface::return_type::OK;
 }
+
+void DiffDriveController::set_param(const std::string &param_id, double value) {
+  auto request = std::make_shared<mavros_msgs::srv::ParamSetV2::Request>();
+  request->param_id = param_id;
+
+  request->value.type = 2; // MAV_PARAM_TYPE_INT32
+  request->value.integer_value = static_cast<int32_t>(value);
+
+  auto future = param_set_client_->async_send_request(request);
+  if (future.wait_for(2s) == std::future_status::ready) {
+    auto response = future.get();
+    if (response->success) {
+      RCLCPP_INFO(get_node()->get_logger(), "Set %s = %d", param_id.c_str(), static_cast<int>(value));
+    } else {
+      RCLCPP_ERROR(get_node()->get_logger(), "Failed to set parameter %s", param_id.c_str());
+    }
+  } else {
+    RCLCPP_ERROR(get_node()->get_logger(), "Timeout setting parameter %s", param_id.c_str());
+  }
+}
+
 
 controller_interface::CallbackReturn DiffDriveController::on_configure(
   const rclcpp_lifecycle::State &)
