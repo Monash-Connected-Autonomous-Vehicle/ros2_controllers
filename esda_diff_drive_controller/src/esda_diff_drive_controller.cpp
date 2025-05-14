@@ -65,10 +65,7 @@ controller_interface::CallbackReturn EsdaDiffDriveController::on_init()
     //----MAVROS PARAMTER SETUP----
     param_set_client_ = get_node()->create_client<mavros_msgs::srv::ParamSetV2>("/mavros/param/set");
 
-    if (!param_set_client_->wait_for_service(60s)) {
-      RCLCPP_ERROR(get_node()->get_logger(), "ParamSet service not available.");
-    }
-
+    
     const geometry_msgs::msg::Twist empty_twist;
 
     // Fill last two commands with default constructed commands
@@ -349,6 +346,10 @@ controller_interface::CallbackReturn EsdaDiffDriveController::on_configure(
     params_ = param_listener_->get_params();
     RCLCPP_INFO(logger, "Parameters were updated");
   }
+
+  // if (!param_set_client_->wait_for_service(60s)) {
+    // RCLCPP_ERROR(get_node()->get_logger(), "ParamSet service not available.");
+  // }
 
   if (params_.left_wheel_names.size() != params_.right_wheel_names.size())
   {
